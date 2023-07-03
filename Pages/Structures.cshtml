@@ -1,0 +1,24 @@
+@page "/structures"
+@model BlankyBlankLibrary.Pages.StructuresModel
+@{
+    ViewData["Title"] = "Structures";
+}
+<div class="row">
+    @foreach (var structure in Model.Structures) {
+        <div class="col-12">
+            <div class="card border border-primary mb-3">
+                <h5 class="card-header text-bg-primary">@structure.Category</h5>
+                <div class="card-body">
+                    <h6 class="text-secondary">Sentences</h6>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var sentance in structure.Structures) {
+                            <li class="list-group-item">
+                                @sentance
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+</div>

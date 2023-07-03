@@ -78,7 +78,7 @@ public class ImportLibraryModel : PageModel {
                 dbStructure.Category = string.IsNullOrWhiteSpace(item.Category) ? throw new Exception("Category can not be empty.") : item.Category;
                 dbStructure.ImportedId = Convert.ToInt32(item.Id);
                 dbStructure.Structures = item.Structures.Select(x => new Data.Models.SentenceStructure.StructureStructure() { Value = x }).ToList();
-                _db.SentenceStructures.Add(dbStructure);
+                _db.Structures.Add(dbStructure);
             }
         }
 

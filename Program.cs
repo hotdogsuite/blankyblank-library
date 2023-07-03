@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 }
 
 builder.Services.AddScoped<BlankyBlankLibrary.Services.WordServices>();
+builder.Services.AddScoped<BlankyBlankLibrary.Services.StructureServices>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
