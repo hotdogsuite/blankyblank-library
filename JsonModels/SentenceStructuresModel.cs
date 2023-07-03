@@ -1,11 +1,11 @@
 using Newtonsoft.Json;
 
-namespace BlankyBlank.Models;
+namespace BlankyBlankLibrary.JsonModels;
 
 public class SentenceStructuresModel {
 
     [JsonProperty("content")]
-    public List<JetContent> Content { get; set; } = null!;
+    public IList<JetContent> Content { get; set; } = null!;
 
     public class JetContent {
 
@@ -16,7 +16,7 @@ public class SentenceStructuresModel {
         public string Id { get; set; } = null!;
 
         [JsonProperty("structures")]
-        public List<string> Structures { get; set; } = null!;
+        public IList<string> Structures { get; set; } = null!;
 
     }
 

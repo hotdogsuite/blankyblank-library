@@ -4,7 +4,71 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row" data-masonry>
+    @foreach (var password in Model.Passwords) {
+        <div class="col-6 mb-3">
+            <div class="card">
+                <h5 class="card-header">@password.Password</h5>
+                <div class="card-body">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">ID</th>
+                                <td>
+                                    @password.Id.ToString("0000")
+                                    @if (password.ImportedId != null) {
+                                        <i class="text-secondary">
+                                            (@password.ImportedId.Value.ToString("00000"))
+                                        </i>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Alternative spellings</th>
+                                <td>@string.Join(", ", password.AlternativeSpellings)</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Forbidden words</th>
+                                <td>@string.Join(", ", password.ForbiddenWords)</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Difficulty</th>
+                                <td>
+                                    @switch (password.Difficulty)
+                                    {
+                                        case "easy":
+                                            <span class="badge text-bg-success">@password.Difficulty</span>
+                                            break;
+                                        case "medium":
+                                            <span class="badge text-bg-warning">@password.Difficulty</span>
+                                            break;
+                                        case "hard":
+                                            <span class="badge text-bg-danger">@password.Difficulty</span>
+                                            break;
+                                        default:
+                                            throw new Exception("Idk about this one.");
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Category</th>
+                                <td>
+                                    @password.Category
+                                    @if (password.Subcategory != null) {
+                                        <i class="text-secondary">
+                                            @password.Subcategory
+                                        </i>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">US-centric?</th>
+                                <td>@(password.UsCentric ? "yes" : "no")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
 </div>

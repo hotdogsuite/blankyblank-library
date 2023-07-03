@@ -7,10 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
     var appConnectionString = builder.Configuration.GetConnectionString("DbContextConnection") ?? throw new InvalidOperationException("Connection string 'PlopDbContextConnection' not found.");
     builder.Services.AddDbContext<BlankyBlankLibrary.Data.AppDbContext>(options => {
         options.UseSqlite(appConnectionString);
-        options.EnableSensitiveDataLogging(true);
     });
     builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<BlankyBlankLibrary.Data.AppDbContext>();
 }
+
+builder.Services.AddScoped<BlankyBlankLibrary.Services.WordServices>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -21,6 +22,7 @@ using (var scope = app.Services.CreateScope()) {
 
     var db = scope.ServiceProvider.GetRequiredService<BlankyBlankLibrary.Data.AppDbContext>();
     
+    // db.Database.EnsureDeleted();
     db.Database.EnsureCreated();
     
     var um = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();

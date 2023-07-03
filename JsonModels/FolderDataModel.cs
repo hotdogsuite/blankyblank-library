@@ -1,11 +1,11 @@
 using Newtonsoft.Json;
 
-namespace BlankyBlank.JsonModels;
+namespace BlankyBlankLibrary.JsonModels;
 
 public class FolderDataModel {
 
     [JsonProperty("fields")]
-    public IEnumerable<Field> Fields { get; set; } = null!;
+    public IList<Field> Fields { get; set; } = null!;
 
     public class Field {
 

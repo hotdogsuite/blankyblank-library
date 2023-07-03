@@ -1,11 +1,11 @@
 using Newtonsoft.Json;
 
-namespace BlankyBlank.Models;
+namespace BlankyBlankLibrary.JsonModels;
 
 public class WordListsModel {
 
     [JsonProperty("content")]
-    public List<JetContent> Content { get; set; } = null!;
+    public IList<JetContent> Content { get; set; } = null!;
 
     public class JetContent {
 
@@ -28,7 +28,7 @@ public class WordListsModel {
         public string Placeholder { get; set; } = null!;
 
         [JsonProperty("words")]
-        public List<JetWord> Words { get; set; } = null!;
+        public IList<JetWord> Words { get; set; } = null!;
 
         public class JetWord {
 
