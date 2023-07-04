@@ -11,7 +11,7 @@ public class Password {
 
     public IList<AlternateSpelling> AlternateSpellings { get; set; } = null!;
 
-    public string Category { get; set; } = null!;
+    public SentenceStructure Category { get; set; } = null!;
 
     public string Difficulty { get; set; } = null!;
 

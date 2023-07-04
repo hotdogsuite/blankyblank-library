@@ -11,8 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<BlankyBlankLibrary.Data.AppDbContext>();
 }
 
-builder.Services.AddScoped<BlankyBlankLibrary.Services.WordServices>();
+builder.Services.AddScoped<BlankyBlankLibrary.Services.PasswordServices>();
 builder.Services.AddScoped<BlankyBlankLibrary.Services.StructureServices>();
+builder.Services.AddScoped<BlankyBlankLibrary.Services.WordServices>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();

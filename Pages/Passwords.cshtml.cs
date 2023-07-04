@@ -4,20 +4,16 @@ namespace BlankyBlankLibrary.Pages;
 
 public class PasswordsModel : PageModel {
     
-    private readonly Data.AppDbContext _db;
+    private readonly Services.PasswordServices _passwordServices;
 
-    public PasswordsModel(Data.AppDbContext db) {
-        _db = db;
+    public PasswordsModel(Services.PasswordServices passwordServices) {
+        _passwordServices = passwordServices;
     }
 
     public IList<ViewModels.PasswordList> Passwords { get; set; } = null!;
 
     public void OnGet() {
-        Passwords = _db.Passwords.OrderBy(x => x.ImportedId)
-            .Select(x => new ViewModels.PasswordList() {
-                Password = x.PasswordPassword
-            })
-            .ToList();
+        Passwords = _passwordServices.GetPasswords();
     }
 
 }

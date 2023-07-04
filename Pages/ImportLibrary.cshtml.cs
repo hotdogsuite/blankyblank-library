@@ -36,6 +36,20 @@ public class ImportLibraryModel : PageModel {
             passwordsFolders.Add(jetModel);
         }
 
+        // Process stuctures
+        {
+            string path = Path.Combine(LibraryPath, "BlankyBlankSentenceStructures.jet");
+            JsonModels.SentenceStructuresModel jsonModel = JsonConvert.DeserializeObject<JsonModels.SentenceStructuresModel>(System.IO.File.ReadAllText(path)) ?? throw new Exception("Something bad happened here.");
+            foreach (var item in jsonModel.Content) {
+                var dbStructure = new Data.Models.SentenceStructure();
+                dbStructure.Category = string.IsNullOrWhiteSpace(item.Category) ? throw new Exception("Category can not be empty.") : item.Category;
+                dbStructure.ImportedId = Convert.ToInt32(item.Id);
+                dbStructure.Structures = item.Structures.Select(x => new Data.Models.SentenceStructure.StructureStructure() { Value = x }).ToList();
+                _db.Structures.Add(dbStructure);
+            }
+            await _db.SaveChangesAsync();
+        }
+
         // Process passwords
         {
             string path = Path.Combine(LibraryPath, "BlankyBlankPasswords.jet");
@@ -58,7 +72,8 @@ public class ImportLibraryModel : PageModel {
                     Word = Scrub(x.Word) ?? throw new Exception("Value can not be empty.")
                 }).ToList();
 
-                dbItem.Category = string.IsNullOrWhiteSpace(item.Category) ? throw new Exception("Category can not be empty.") : item.Category.Trim();
+                dbItem.Category = _db.Structures.Single(x => x.Category == item.Category);
+                // dbItem.Category = string.IsNullOrWhiteSpace(item.Category) ? throw new Exception("Category can not be empty.") : item.Category.Trim();
                 dbItem.Difficulty = string.IsNullOrWhiteSpace(item.Difficulty) ? throw new Exception("Difficulty can not be empty.") : item.Difficulty.Trim();
                 dbItem.ImportedId = Convert.ToInt32(item.Id);
                 dbItem.PasswordPassword = string.IsNullOrWhiteSpace(item.Password) ? throw new Exception("Password can not be empty.") : item.Password.Trim();
@@ -67,19 +82,7 @@ public class ImportLibraryModel : PageModel {
 
                 _db.Passwords.Add(dbItem);
             }
-        }
-
-        // Process stuctures
-        {
-            string path = Path.Combine(LibraryPath, "BlankyBlankSentenceStructures.jet");
-            JsonModels.SentenceStructuresModel jsonModel = JsonConvert.DeserializeObject<JsonModels.SentenceStructuresModel>(System.IO.File.ReadAllText(path)) ?? throw new Exception("Something bad happened here.");
-            foreach (var item in jsonModel.Content) {
-                var dbStructure = new Data.Models.SentenceStructure();
-                dbStructure.Category = string.IsNullOrWhiteSpace(item.Category) ? throw new Exception("Category can not be empty.") : item.Category;
-                dbStructure.ImportedId = Convert.ToInt32(item.Id);
-                dbStructure.Structures = item.Structures.Select(x => new Data.Models.SentenceStructure.StructureStructure() { Value = x }).ToList();
-                _db.Structures.Add(dbStructure);
-            }
+            await _db.SaveChangesAsync();
         }
 
         // Process words
@@ -131,10 +134,10 @@ public class ImportLibraryModel : PageModel {
                 // }
                 _db.Words.Add(word);
             }
+            await _db.SaveChangesAsync();
 
         }
 
-        await _db.SaveChangesAsync();
         _logger.LogInformation("*** DING! ***");
 
     }
