@@ -16,6 +16,8 @@ public class PasswordList {
 
     public bool UsCentric { get; set; }
 
+    public bool IncludeInExport { get; set; }
+
     public IList<string> AlternativeSpellings { get; set; } = null!;
 
     public IList<string> ForbiddenWords { get; set; } = null!;

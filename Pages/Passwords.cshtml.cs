@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BlankyBlankLibrary.Pages;
@@ -14,6 +15,11 @@ public class PasswordsModel : PageModel {
 
     public void OnGet() {
         Passwords = _passwordServices.GetPasswords();
+    }
+
+    public async Task<IActionResult> OnPostToggleExport(int passwordId, bool includeInExport) {
+        await _passwordServices.SetIncludeInExport(passwordId, includeInExport);
+        return RedirectToPage("/Passwords");
     }
 
 }

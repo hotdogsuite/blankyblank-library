@@ -27,6 +27,8 @@ public class Password {
 
     public bool UsCentric { get; set; }
 
+    public bool IncludeInExport { get; set; }
+
     [Table("bbl_passwords_alt")]
     public class AlternateSpelling : KeyedString {
 

@@ -73,12 +73,13 @@ public class ImportLibraryModel : PageModel {
                 }).ToList();
 
                 dbItem.Category = _db.Structures.Single(x => x.Category == item.Category);
-                // dbItem.Category = string.IsNullOrWhiteSpace(item.Category) ? throw new Exception("Category can not be empty.") : item.Category.Trim();
                 dbItem.Difficulty = string.IsNullOrWhiteSpace(item.Difficulty) ? throw new Exception("Difficulty can not be empty.") : item.Difficulty.Trim();
                 dbItem.ImportedId = Convert.ToInt32(item.Id);
                 dbItem.PasswordPassword = string.IsNullOrWhiteSpace(item.Password) ? throw new Exception("Password can not be empty.") : item.Password.Trim();
                 dbItem.Subcategory = string.IsNullOrWhiteSpace(item.Subcategory) ? null : item.Subcategory.Trim();
                 dbItem.UsCentric = item.Us;
+
+                dbItem.IncludeInExport = false;
 
                 _db.Passwords.Add(dbItem);
             }
