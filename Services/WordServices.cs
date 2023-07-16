@@ -20,9 +20,14 @@ public class WordServices {
                     Id = y.Id,
                     AlwaysChoose = y.AlwaysChoose,
                     Word = y.Word,
-                    LinkedWords = y.LinkedWord != null ? y.LinkedWord.Words.Select(y => new ViewModels.WordList.WordListWord() {
-                        AlwaysChoose = y.AlwaysChoose,
-                        Word = y.Word
+                    LinkedWords = y.LinkedWord != null ? y.LinkedWord.Words.Select(z => new ViewModels.WordList.WordListWord() {
+                        AlwaysChoose = z.AlwaysChoose,
+                        Word = z.Word,
+                        LinkedWords = z.LinkedWord != null ? z.LinkedWord.Words.Select(a => new ViewModels.WordList.WordListWord() {
+                            AlwaysChoose = a.AlwaysChoose,
+                            Word = a.Word
+                        })
+                        .ToList() : null
                     })
                     .ToList() : null
                 })

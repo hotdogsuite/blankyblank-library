@@ -44,9 +44,30 @@
                             <ul class="list-group list-group-flush">
                                 @foreach (var wordWord in word.Words) {
                                     <li class="list-group-item">
-                                        @wordWord.Word
+                                        
+                                        @* Main word *@
+                                        <span class="text-primary-emphasis">@wordWord.Word</span>
+                                        
                                         @if (wordWord.LinkedWords != null) {
-                                            <span class="text-secondary">@string.Join(", ", wordWord.LinkedWords.Select(x => x.Word))</span>
+                                            @* Sub-words *@
+                                            @for (int i = 0; i < wordWord.LinkedWords.Count(); i++) {
+                                                
+                                                @* First level *@
+                                                <span class="text-warning">
+                                                    @if (i != 0) {
+                                                        <span>|</span>
+                                                    }
+                                                </span>
+                                                
+                                                @wordWord.LinkedWords[i].Word
+
+                                                @if (wordWord.LinkedWords[i].LinkedWords != null) {
+                                                    <span class="text-secondary">
+                                                        (@string.Join(", ", wordWord.LinkedWords[i].LinkedWords!.Select(x => x.Word)))
+                                                    </span>
+                                                }
+                                            }
+                                            
                                         }
                                     </li>
                                 }
