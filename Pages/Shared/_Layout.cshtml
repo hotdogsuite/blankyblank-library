@@ -1,8 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-bs-theme="dark" class="h-100">
     <head>
         <meta charset="utf-8" />
@@ -20,29 +16,6 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Structures">Categories</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Words">Words</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Passwords">Passwords</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/ImportLibrary">Import Library</a>
-                        </li>
-                        @* @if (SignInManager.IsSignedIn(User)) {
-                            <li class="nav-item">
-                                <form class="form-inline" asp-area="" asp-page="/Logout">
-                                    <button type="submit" class='nav-link btn btn-link border-0'>Logout</button>
-                                </form>
-                            </li>
-                        } else {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-page="/Login">Login</a>
-                            </li>
-                        } *@
                     </ul>
                 </div>
             </nav>
