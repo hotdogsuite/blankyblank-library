@@ -3,12 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-{
-    var appConnectionString = builder.Configuration.GetConnectionString("DbContextConnection") ?? throw new InvalidOperationException("Connection string 'PlopDbContextConnection' not found.");
-    builder.Services.AddDbContext<BlankyBlankLibrary.Data.AppDbContext>(options => {
-        options.UseSqlite(appConnectionString);
-    });
-}
+var appConnectionString = builder.Configuration.GetConnectionString("DbContextConnection") ?? throw new InvalidOperationException("Connection string 'PlopDbContextConnection' not found.");
+builder.Services.AddDbContext<BlankyBlankLibrary.Data.AppDbContext>(options => {
+    options.UseSqlite(appConnectionString);
+});
+
+builder.Services.AddScoped<BlankyBlankLibrary.Services.WordServices>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();

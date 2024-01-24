@@ -1,0 +1,21 @@
+@page "/words"
+@model BlankyBlankLibrary.Pages.WordsModel
+@{
+    ViewData["Title"] = "Words";
+}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label asp-for="WordList" class="form-label"></label>
+        <input asp-for="WordList" class="form-control">
+    </div>
+    <div class="mb-3">
+        <button type="submit" asp-page-handler="Import" class="btn btn-primary">Import Word List</button>
+    </div>
+</form>
+
+<form method="post">
+    <div class="mb-3">
+        <button type="submit" asp-page-handler="Export" class="btn btn-primary">Export Word List</button>
+    </div>
+</form>
