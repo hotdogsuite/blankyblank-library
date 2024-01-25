@@ -8,6 +8,7 @@ builder.Services.AddDbContext<BlankyBlankLibrary.Data.AppDbContext>(options => {
     options.UseSqlite(appConnectionString);
 });
 
+builder.Services.AddScoped<BlankyBlankLibrary.Services.PasswordServices>();
 builder.Services.AddScoped<BlankyBlankLibrary.Services.WordServices>();
 
 // Add services to the container.

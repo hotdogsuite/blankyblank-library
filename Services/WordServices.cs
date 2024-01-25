@@ -11,10 +11,16 @@ public class WordServices {
 
     public WordServices (Data.AppDbContext db) => _db = db;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="wordListFile"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     public async Task ImportWordList (IFormFile wordListFile) {
 
         // Deserialize into WordList
-        ViewModels.WordListContainer incomingWordLists = JsonConvert.DeserializeObject<ViewModels.WordListContainer>(await wordListFile.ReadFileContents()) ?? throw new Exception("What're you feeding me?");
+        ViewModels.WordListsContainer incomingWordLists = JsonConvert.DeserializeObject<ViewModels.WordListsContainer>(await wordListFile.ReadFileContents()) ?? throw new Exception("What're you feeding me?");
 
         // Regex formats for incoming data. Expecting
         // word-values-like-this
@@ -83,16 +89,19 @@ public class WordServices {
 
     }
 
-    public ViewModels.FileContainer ExportLegacyWordList () {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public ViewModels.FileContainer ExportWordList () {
 
-        ViewModels.WordListContainer container = new ViewModels.WordListContainer
+        ViewModels.WordListsContainer container = new ViewModels.WordListsContainer
         {
             WordLists = _db.WordLists
-                .Where(word_list => word_list.LegacyId != null)
                 .OrderBy(word_list => word_list.LegacyId)
-                .Select(word_list => new ViewModels.WordListContainer.WordList()
+                .Select(word_list => new ViewModels.WordListsContainer.WordList()
                 {
-                    Id = word_list.LegacyId.ToString()!,
+                    Id = word_list.Id.ToString()!,
                     Name = word_list.Name,
                     Amount = word_list.Amount == null ? "" : word_list.Amount.ToString(),
                     MaxChoices = word_list.MaxChoices.ToString()!,
@@ -107,7 +116,7 @@ public class WordServices {
             var words = _db.WordLists
                 .Where(word_list => word_list.Name == wordList.Name)
                 .SelectMany(word_list => word_list.Words)
-                .Select(word => new ViewModels.WordListContainer.WordList.Word() {
+                .Select(word => new ViewModels.WordListsContainer.WordList.Word() {
                     WordName = word.WordName,
                     AlwaysChoose = word.AlwaysChoose
                 })
@@ -116,7 +125,7 @@ public class WordServices {
             var lists = _db.WordLists
                 .Where(word_list => word_list.Name == wordList.Name)
                 .SelectMany(word_list => word_list.Lists)
-                .Select(list => new ViewModels.WordListContainer.WordList.Word() {
+                .Select(list => new ViewModels.WordListsContainer.WordList.Word() {
                     WordName = $"<{list.List.Name}>",
                     AlwaysChoose = list.AlwaysChoose
                 })
@@ -134,5 +143,11 @@ public class WordServices {
             FileName = "BlankyBlankWordLists.jet"
         };
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public int GetWordListCount () => _db.WordLists.Count();
 
 }

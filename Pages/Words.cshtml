@@ -4,18 +4,82 @@
     ViewData["Title"] = "Words";
 }
 
-<form method="post" enctype="multipart/form-data">
-    <div class="mb-3">
-        <label asp-for="WordList" class="form-label"></label>
-        <input asp-for="WordList" class="form-control">
-    </div>
-    <div class="mb-3">
-        <button type="submit" asp-page-handler="Import" class="btn btn-primary">Import Word List</button>
-    </div>
-</form>
+<div class="row">
 
-<form method="post">
-    <div class="mb-3">
-        <button type="submit" asp-page-handler="Export" class="btn btn-primary">Export Word List</button>
+    <div class="col-6">
+
+        <div class="card mb-3 h-100">
+
+            <h5 class="card-header">Import Word Lists</h5>
+            <form method="post" enctype="multipart/form-data" class="card-body">
+
+                <p class="card-body">
+                    Import your game's stock <i>BlankyBlankWordLists.jet</i> file to seed
+                    the word lists tables. This is located in the game files; on macOS + Steam, for example,  under
+                    <i>Resources/macos/games/BlankyBlank/content</i>.
+                </p>
+
+                <p class="card-body">
+                    For the most part, data is left unchanged but massaged into a relational database.
+                    But there are a couple instances where values didn't line up.
+                </p>
+                
+                <ul class="card-body list-group list-group-flush list-group-numbered">
+                    <li class="list-group-item">
+                        We're ignoring a reference to a list (<i>gadget</i>) that doesn't exist 
+                        in the stock file. There's a word <i>gadget</i> but no list named <i>gadget</i>.
+                        We're just ignoring that one on import.
+                    </li>
+                    <li class="list-group-item">
+                        There is one instance as of this writing where the list name is written with
+                        spaces (<i>is in relation to</i>) instead of dashes (<i>is-in-relation-to</i>.)
+                        The list name format is entirely space-less, so we're replacing all spaces with
+                        dashes to cover it.
+                    </li>
+                </ul>
+
+                <hr>
+
+                <div class="card-body">
+                    <label asp-for="WordList" class="form-label"></label>
+                    <input asp-for="WordList" class="form-control">
+                </div>
+                <div class="card-body">
+                    <button type="submit" asp-page-handler="Import" class="btn btn-primary w-100">Import Word List</button>
+                </div>
+            </form>
+
+        </div>
+
     </div>
-</form>
+
+    <div class="col-6">
+
+        <div class="card mb-3 h-100">
+
+            <h5 class="card-header">Export Word Lists</h5>
+            <form method="post" class="card-body">
+
+                <p class="card-body">
+                    Export your <i>BlankyBlankWordLists.jet</i> file to replace the one in the
+                    game files. Backing up your existing file is strongly encouraged. Worst case; if it breaks,
+                    just re-install the game to get back to stock.
+                </p>
+
+                <p class="card-body">
+                    There are @Model.WordListCount word lists in the database.
+                </p>
+
+                <hr>
+
+                <div class="card-body">
+                    <button type="submit" asp-page-handler="Export" class="btn btn-primary w-100">Export Word List</button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

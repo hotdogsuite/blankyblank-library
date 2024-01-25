@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace BlankyBlankLibrary.ViewModels;
 
-public class WordListContainer {
+public class WordListsContainer {
 
     [JsonProperty("content")]
     public IEnumerable<WordList> WordLists { get; set; } = null!;

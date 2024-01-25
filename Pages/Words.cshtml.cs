@@ -13,12 +13,19 @@ public class WordsModel : PageModel {
     [BindProperty, Display(Name = "Word List")]
     public IFormFile WordList { get; set; } = null!;
 
-    public async Task OnPostImport () {
+    public int WordListCount { get; set; }
+
+    public void OnGet () {
+        WordListCount = _wordServices.GetWordListCount();
+    }
+
+    public async Task<IActionResult> OnPostImport () {
         await _wordServices.ImportWordList(WordList);
+        return RedirectToPage();
     }
 
     public IActionResult OnPostExport () {
-        var export = _wordServices.ExportLegacyWordList();
+        var export = _wordServices.ExportWordList();
         return File(export.FileContents, export.FileContentType, export.FileName);
     }
 
