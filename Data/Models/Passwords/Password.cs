@@ -13,4 +13,18 @@ public class Password {
 
     public string Name { get; set; } = null!;
 
+    public string Difficulty { get; set; } = null!;
+
+    public string Category { get; set; } = null!;
+
+    public string? Subcategory { get; set; }
+
+    public bool UsCentric { get; set; }
+
+    public ICollection<AlternateSpelling> AlternateSpellings { get; set; } = null!;
+
+    public ICollection<ForbiddenWord> ForbiddenWords { get; set; } = null!;
+
+    public ICollection<TailoredWord> TailoredWords { get; set; } = null!;
+
 }

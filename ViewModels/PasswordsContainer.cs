@@ -30,7 +30,7 @@ public class PasswordsContainer {
         [JsonProperty("password")]
         public string Name { get; set; } = null!;
 
-        [JsonProperty("tailoredwords")]
+        [JsonProperty("tailoredWords")]
         public IEnumerable<TailoredWord> TailoredWords { get; set; } = null!;
         
         [JsonProperty("us")]
