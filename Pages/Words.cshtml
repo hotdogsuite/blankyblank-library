@@ -4,82 +4,127 @@
     ViewData["Title"] = "Words";
 }
 
-<div class="row">
+<h4>Word Lists</h4>
 
-    <div class="col-6">
+<hr>
 
-        <div class="card mb-3 h-100">
+@if (!Model.ExistingWordLists.Any()) {
+    <p class="alert alert-info">
+        There are no word lists in the database. Get to importing, friend!
+    </p>
+}
 
-            <h5 class="card-header">Import Word Lists</h5>
-            <form method="post" enctype="multipart/form-data" class="card-body">
+<div class="row" data-masonry>
 
-                <p class="card-body">
-                    Import your game's stock <i>BlankyBlankWordLists.jet</i> file to seed
-                    the word lists tables. This is located in the game files; on macOS + Steam, for example,  under
-                    <i>Resources/macos/games/BlankyBlank/content</i>.
+    <div class="col-4">
+
+        <div class="card border-primary mb-3">
+
+            <h5 class="card-header text-bg-primary">Import / Export</h5>
+
+            <div class="card-body">
+
+                <p class="card-text">
+                    Import your stock <code>BlankyBlankWordLists.jet</code> file from your
+                    game's installation. The location of your installation will vary but,
+                    within the game files, the <code>.jet</code> files should be under
+                    <code>games\BlankyBlank\content</code>.
                 </p>
 
-                <p class="card-body">
-                    For the most part, data is left unchanged but massaged into a relational database.
-                    But there are a couple instances where values didn't line up.
+                <p class="card-text">
+                    <a href="/images/blanky-location.png">
+                        <img src="/images/blanky-location.png" alt="BlankyBlank folder structure." class="img-fluid">
+                    </a>
                 </p>
-                
-                <ul class="card-body list-group list-group-flush list-group-numbered">
-                    <li class="list-group-item">
-                        We're ignoring a reference to a list (<i>gadget</i>) that doesn't exist 
-                        in the stock file. There's a word <i>gadget</i> but no list named <i>gadget</i>.
-                        We're just ignoring that one on import.
-                    </li>
-                    <li class="list-group-item">
-                        There is one instance as of this writing where the list name is written with
-                        spaces (<i>is in relation to</i>) instead of dashes (<i>is-in-relation-to</i>.)
-                        The list name format is entirely space-less, so we're replacing all spaces with
-                        dashes to cover it.
-                    </li>
-                </ul>
+
+                <p class="card-text">
+                    For the most part, data is left unchanged, but some exceptions are made to
+                    massage the data into relational tables.
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            Ignoring a reference to list <code>&lt;gadget&gt;</code> as the list doesn't exist.
+                        </li>
+                        <li class="list-group-item">
+                            Replacing spaces with dashes within list name references to catch one
+                            known instance where the formatting differs, (for <code>is-in-relation-to</code>.)
+                        </li>
+                    </ul>
+                </p>
 
                 <hr>
 
-                <div class="card-body">
-                    <label asp-for="WordList" class="form-label"></label>
-                    <input asp-for="WordList" class="form-control">
-                </div>
-                <div class="card-body">
-                    <button type="submit" asp-page-handler="Import" class="btn btn-primary w-100">Import Word List</button>
-                </div>
-            </form>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label asp-for="IncomingWordList" class="form-label"></label>
+                        <input asp-for="IncomingWordList" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <button type="submit" asp-page-handler="Import" class="btn btn-primary w-100">Import Word List</button>
+                    </div>
+                </form>
 
-        </div>
+                <hr>
 
-    </div>
-
-    <div class="col-6">
-
-        <div class="card mb-3 h-100">
-
-            <h5 class="card-header">Export Word Lists</h5>
-            <form method="post" class="card-body">
-
-                <p class="card-body">
-                    Export your <i>BlankyBlankWordLists.jet</i> file to replace the one in the
+                <p class="card-text">
+                    Export your <code>BlankyBlankWordLists.jet</code> file to replace the one in the
                     game files. Backing up your existing file is strongly encouraged. Worst case; if it breaks,
                     just re-install the game to get back to stock.
                 </p>
 
-                <p class="card-body">
-                    There are @Model.WordListCount word lists in the database.
-                </p>
-
                 <hr>
 
-                <div class="card-body">
-                    <button type="submit" asp-page-handler="Export" class="btn btn-primary w-100">Export Word List</button>
-                </div>
-
-            </form>
+                <form method="post">
+                    <div class="mb-3">
+                        <button type="submit" asp-page-handler="Export" class="btn btn-primary w-100">Export Word List</button>
+                    </div>
+                </form>
+            </div>
 
         </div>
 
     </div>
+
+    @foreach (var wordList in Model.ExistingWordLists) {
+        <div class="col-4">
+            <div class="card mb-3">
+                <h6 class="card-header d-flex justify-content-between">
+                    <div>@wordList.Name</div>
+                    <div>#@wordList.Id.ToString("000")</div>
+                </h6>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        @if (wordList.Placeholder != null) {
+                            <li class="list-group-item">
+                                <span class="text-body-tertiary">Placeholder:</span>
+                                <span>@wordList.Placeholder</span>
+                            </li>
+                        }
+                        @if (wordList.Amount.HasValue) {
+                            <li class="list-group-item">
+                                <span class="text-body-tertiary">Amount:</span>
+                                <span>@wordList.Amount</span>
+                            </li>
+                        }
+                        @if (wordList.MaxChoices.HasValue) {
+                            <li class="list-group-item">
+                                <span class="text-body-tertiary">Max Choices:</span>
+                                <span>@wordList.MaxChoices</span>
+                            </li>
+                        }
+                        <li class="list-group-item">
+                            <span class="text-body-tertiary">Optional:</span>
+                            <span>@(wordList.Optional ? "Yes" : "No")</span>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-body-tertiary">Words:</span>
+                            <span>
+                                @string.Join(", ", wordList.Words.Concat(wordList.Lists.Select(list => $"<{list}>")))
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
 
 </div>

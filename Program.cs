@@ -9,7 +9,7 @@ builder.Services.AddDbContext<BlankyBlankLibrary.Data.AppDbContext>(options => {
 });
 
 builder.Services.AddScoped<BlankyBlankLibrary.Services.PasswordServices>();
-builder.Services.AddScoped<BlankyBlankLibrary.Services.WordServices>();
+builder.Services.AddScoped<BlankyBlankLibrary.Services.WordListServices>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -18,7 +18,7 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope()) {
     var db = scope.ServiceProvider.GetRequiredService<BlankyBlankLibrary.Data.AppDbContext>();
-    db.Database.EnsureDeleted();
+    // db.Database.EnsureDeleted();
     db.Database.EnsureCreated();
 }
 

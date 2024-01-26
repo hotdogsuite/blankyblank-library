@@ -6,21 +6,24 @@ namespace BlankyBlankLibrary.Pages;
 
 public class WordsModel : PageModel {
 
-    private readonly Services.WordServices _wordServices;
+    private readonly Services.WordListServices _wordServices;
 
-    public WordsModel (Services.WordServices wordServices) => _wordServices = wordServices;
+    public WordsModel (Services.WordListServices wordServices) => _wordServices = wordServices;
 
-    [BindProperty, Display(Name = "Word List")]
-    public IFormFile WordList { get; set; } = null!;
+    [BindProperty, Display(Name = "Word Lists")]
+    public IFormFile IncomingWordList { get; set; } = null!;
+
+    public IEnumerable<ViewModels.WordListListItem> ExistingWordLists { get; set; } = null!;
 
     public int WordListCount { get; set; }
 
     public void OnGet () {
+        ExistingWordLists = _wordServices.GetWordLists();
         WordListCount = _wordServices.GetWordListCount();
     }
 
     public async Task<IActionResult> OnPostImport () {
-        await _wordServices.ImportWordList(WordList);
+        await _wordServices.ImportWordList(IncomingWordList);
         return RedirectToPage();
     }
 

@@ -5,11 +5,11 @@ using Newtonsoft.Json;
 
 namespace BlankyBlankLibrary.Services;
 
-public class WordServices {
+public class WordListServices {
 
     private readonly Data.AppDbContext _db;
 
-    public WordServices (Data.AppDbContext db) => _db = db;
+    public WordListServices (Data.AppDbContext db) => _db = db;
 
     /// <summary>
     /// 
@@ -149,5 +149,20 @@ public class WordServices {
     /// </summary>
     /// <returns></returns>
     public int GetWordListCount () => _db.WordLists.Count();
+
+    public IEnumerable<ViewModels.WordListListItem> GetWordLists () {
+        return _db.WordLists
+            .OrderBy(word_list => word_list.Name)
+            .Select(word_list => new ViewModels.WordListListItem() {
+                Id = word_list.Id,
+                Name = word_list.Name,
+                Placeholder = word_list.Placeholder,
+                Amount = word_list.Amount,
+                MaxChoices = word_list.MaxChoices,
+                Optional = word_list.Optional,
+                Words = word_list.Words.Select(word => word.WordName),
+                Lists = word_list.Lists.Select(list => list.List.Name)
+            });
+    }
 
 }
