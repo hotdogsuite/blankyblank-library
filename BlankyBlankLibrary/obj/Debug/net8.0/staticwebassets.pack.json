@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "/Users/bill/repos/blankyblank-library/BlankyBlankLibrary/wwwroot/favicon.ico",
+      "PackagePath": "staticwebassets/favicon.ico"
+    },
+    {
+      "Id": "/Users/bill/repos/blankyblank-library/BlankyBlankLibrary/wwwroot/images/blanky-location.png",
+      "PackagePath": "staticwebassets/images/blanky-location.png"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.BlankyBlankLibrary.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.BlankyBlankLibrary.props",
+      "PackagePath": "build\\BlankyBlankLibrary.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.BlankyBlankLibrary.props",
+      "PackagePath": "buildMultiTargeting\\BlankyBlankLibrary.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.BlankyBlankLibrary.props",
+      "PackagePath": "buildTransitive\\BlankyBlankLibrary.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

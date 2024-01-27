@@ -1,0 +1,126 @@
+@page "/words"
+@model BlankyBlankLibrary.Pages.WordsModel
+@{
+    ViewData["Title"] = "Word Lists";
+}
+
+<h4>Word Lists</h4>
+
+<hr>
+
+@if (!Model.ExistingWordLists.Any()) {
+    <p class="alert alert-info">
+        There are no word lists in the database. Get to importing, friend!
+    </p>
+}
+
+<div class="card border-primary mb-3">
+
+    <h5 class="card-header text-bg-primary">Import / Export</h5>
+
+    <div class="card-body">
+
+        <p class="card-text">
+            Import your stock <code>BlankyBlankWordLists.jet</code> file from your
+            game's installation. The location of your installation will vary but,
+            within the game files, the <code>.jet</code> files should be under
+            <code>games\BlankyBlank\content</code>.
+        </p>
+
+        <p class="card-text">
+            <a href="/images/blanky-location.png">
+                <img src="/images/blanky-location.png" alt="BlankyBlank folder structure." class="img-fluid">
+            </a>
+        </p>
+
+        <p class="card-text">
+            For the most part, data is left unchanged, but some exceptions are made to
+            massage the data to fit into relational tables.
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    Ignoring a reference to list <code>&lt;gadget&gt;</code> as the list doesn't exist.
+                </li>
+                <li class="list-group-item">
+                    Replacing spaces with dashes within list name references to catch one
+                    known instance where the formatting differs, (for <code>is-in-relation-to</code>.)
+                </li>
+            </ul>
+        </p>
+
+        <hr>
+
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label asp-for="IncomingWordList" class="form-label"></label>
+                <input asp-for="IncomingWordList" class="form-control">
+            </div>
+            <div class="mb-3">
+                <button type="submit" asp-page-handler="Import" class="btn btn-primary w-100">Import Word List</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <p class="card-text">
+            Export your <code>BlankyBlankWordLists.jet</code> file to replace the one in the
+            game files. Backing up your existing file is strongly encouraged. Worst case; if it breaks,
+            just re-install the game to get back to stock.
+        </p>
+
+        <hr>
+
+        <form method="post">
+            <div class="mb-3">
+                <button type="submit" asp-page-handler="Export" class="btn btn-primary w-100">Export Word List</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<div class="row" data-masonry>
+
+    @foreach (var wordList in Model.ExistingWordLists) {
+        <div class="col-4">
+            <div class="card mb-3">
+                <h6 class="card-header d-flex justify-content-between">
+                    <div>@wordList.Name</div>
+                    <div>#@wordList.Id.ToString("000")</div>
+                </h6>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        @if (wordList.Placeholder != null) {
+                            <li class="list-group-item">
+                                <span class="text-body-tertiary">Placeholder:</span>
+                                <span>@wordList.Placeholder</span>
+                            </li>
+                        }
+                        @if (wordList.Amount.HasValue) {
+                            <li class="list-group-item">
+                                <span class="text-body-tertiary">Amount:</span>
+                                <span>@wordList.Amount</span>
+                            </li>
+                        }
+                        @if (wordList.MaxChoices.HasValue) {
+                            <li class="list-group-item">
+                                <span class="text-body-tertiary">Max Choices:</span>
+                                <span>@wordList.MaxChoices</span>
+                            </li>
+                        }
+                        <li class="list-group-item">
+                            <span class="text-body-tertiary">Optional:</span>
+                            <span>@(wordList.Optional ? "Yes" : "No")</span>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-body-tertiary">Words:</span>
+                            <span>
+                                @string.Join(", ", wordList.Words.Concat(wordList.Lists.Select(list => $"<{list}>")))
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
