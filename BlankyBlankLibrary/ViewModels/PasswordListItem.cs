@@ -6,6 +6,8 @@ public class PasswordListItem {
 
     public string Name { get; set; } = null!;
 
+    public bool IncludeInExport { get; set; }
+
     public string Difficulty { get; set; } = null!;
 
     public string Category { get; set; } = null!;

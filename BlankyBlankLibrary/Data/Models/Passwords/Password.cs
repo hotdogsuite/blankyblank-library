@@ -11,6 +11,8 @@ public class Password {
 
     public int? LegacyId { get; set; }
 
+    public bool IncludeInExport { get; set; }
+
     public string Name { get; set; } = null!;
 
     public string Difficulty { get; set; } = null!;

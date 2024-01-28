@@ -70,6 +70,7 @@ public class PasswordServices {
                     if (dbPassword == null) {
                         dbPassword = new Data.Models.Passwords.Password() {
                             LegacyId = Convert.ToInt32(password.Id),
+                            IncludeInExport = true,
                             Name = password.Name.Trim(),
                             Difficulty = password.Difficulty,
                             Subcategory = dbSubcategory,
@@ -116,6 +117,7 @@ public class PasswordServices {
 
         ViewModels.PasswordsContainer container = new ViewModels.PasswordsContainer {
             Passwords = _db.Passwords
+                .Where(password => password.IncludeInExport)
                 .Select(password => new ViewModels.PasswordsContainer.Password() {
                     Id = password.Id.ToString(),
                     Name = password.Name,
@@ -147,6 +149,7 @@ public class PasswordServices {
             .Select(password => new ViewModels.PasswordListItem() {
                 Id = password.Id,
                 Name = password.Name,
+                IncludeInExport = password.IncludeInExport,
                 Difficulty = password.Difficulty,
                 Category = password.Subcategory.Category.CategoryName,
                 Subcategory = password.Subcategory.SubcategoryName,
@@ -161,36 +164,44 @@ public class PasswordServices {
     }
 
     public ViewModels.PasswordEdit GetPasswordEdit (int id = 0) {
-        if (id == 0) return new ViewModels.PasswordEdit();
-        return _db.Passwords
-            .Where(password => password.Id == id)
-            .Select(password => new ViewModels.PasswordEdit() {
-                Id = password.Id,
-                Name = password.Name,
-                Difficulty = password.Difficulty,
-                SubcategoryId = password.Subcategory.Id,
-                UsCentric = password.UsCentric,
-                AlternateSpellings = password.AlternateSpellings.Select(alt_sp => new ViewModels.PasswordEdit.AlternateSpelling() {
-                    Id = alt_sp.Id,
-                    DeleteOnSave = false,
-                    Spelling = alt_sp.Spelling
+        try {
+            if (id == 0) return new ViewModels.PasswordEdit();
+            return _db.Passwords
+                .Where(password => password.Id == id)
+                .Select(password => new ViewModels.PasswordEdit() {
+                    Id = password.Id,
+                    IncludeInExport = password.IncludeInExport,
+                    Name = password.Name,
+                    Difficulty = password.Difficulty,
+                    SubcategoryId = password.Subcategory.Id,
+                    UsCentric = password.UsCentric,
+                    AlternateSpellings = password.AlternateSpellings.Select(alt_sp => new ViewModels.PasswordEdit.AlternateSpelling() {
+                        Id = alt_sp.Id,
+                        DeleteOnSave = false,
+                        Spelling = alt_sp.Spelling
+                    })
+                    .ToList(),
+                    ForbiddenWords = password.ForbiddenWords.Select(for_wd => new ViewModels.PasswordEdit.ForbiddenWord() {
+                        Id = for_wd.Id,
+                        DeleteOnSave = false,
+                        Word = for_wd.Word
+                    })
+                    .ToList(),
+                    TailoredWords = password.TailoredWords.Select(tlr_wd => new ViewModels.PasswordEdit.TailoredWord() {
+                        Id = tlr_wd.Id,
+                        DeleteOnSave = false,
+                        Word = tlr_wd.Word,
+                        ListId = tlr_wd.List.Id
+                    })
+                    .ToList()
                 })
-                .ToList(),
-                ForbiddenWords = password.ForbiddenWords.Select(for_wd => new ViewModels.PasswordEdit.ForbiddenWord() {
-                    Id = for_wd.Id,
-                    DeleteOnSave = false,
-                    Word = for_wd.Word
-                })
-                .ToList(),
-                TailoredWords = password.TailoredWords.Select(tlr_wd => new ViewModels.PasswordEdit.TailoredWord() {
-                    Id = tlr_wd.Id,
-                    DeleteOnSave = false,
-                    Word = tlr_wd.Word,
-                    ListId = tlr_wd.List.Id
-                })
-                .ToList()
-            })
-            .Single();
+                .Single();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error loading password with id {id}.", ex);
+        }
+
     }
 
     public IEnumerable<SelectListItem> GetCategories () {
@@ -228,6 +239,7 @@ public class PasswordServices {
         }
 
         // Basic Information
+        dbPassword.IncludeInExport = passwordEdit.IncludeInExport;
         dbPassword.Name = passwordEdit.Name;
         dbPassword.Difficulty = passwordEdit.Difficulty;
         dbPassword.Subcategory = _db.PasswordSubcategories.Single(sub => sub.Id == passwordEdit.SubcategoryId);

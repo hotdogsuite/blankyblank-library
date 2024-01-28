@@ -6,6 +6,9 @@ public class PasswordEdit {
 
     public int Id { get; set; }
 
+    [Display(Name = "Include in Export")]
+    public bool IncludeInExport { get; set; }
+
     [Display(Name = "Secret Prompt")]
     public string Name { get; set; } = null!;
 
