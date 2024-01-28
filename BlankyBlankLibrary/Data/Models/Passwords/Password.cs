@@ -15,9 +15,7 @@ public class Password {
 
     public string Difficulty { get; set; } = null!;
 
-    public string Category { get; set; } = null!;
-
-    public string? Subcategory { get; set; }
+    public Subcategory Subcategory { get; set; } = null!;
 
     public bool UsCentric { get; set; }
 

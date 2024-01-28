@@ -12,16 +12,16 @@ public class PasswordEdit {
     public string Difficulty { get; set; } = null!;
 
     [Display(Name = "Category")]
-    public string CombinedCategoryIdentifier { get; set; } = null!;
+    public int SubcategoryId { get; set; }
 
     [Display(Name = "US-centric")]
     public bool UsCentric { get; set; }
 
-    public IList<AlternateSpelling> AlternateSpellings { get; set; } = null!;
+    public IList<AlternateSpelling> AlternateSpellings { get; set; } = new List<AlternateSpelling>();
 
-    public IList<ForbiddenWord> ForbiddenWords { get; set; } = null!;
+    public IList<ForbiddenWord> ForbiddenWords { get; set; } = new List<ForbiddenWord>();
 
-    public IList<TailoredWord> TailoredWords { get; set; } = null!;
+    public IList<TailoredWord> TailoredWords { get; set; } = new List<TailoredWord>();
     
     public class AlternateSpelling {
 

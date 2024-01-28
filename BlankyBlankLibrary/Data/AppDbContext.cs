@@ -8,6 +8,8 @@ namespace BlankyBlankLibrary.Data;
 public class AppDbContext : DbContext {
 
     public DbSet<Models.Passwords.Password> Passwords { get; set; }
+    public DbSet<Models.Passwords.Category> PasswordCategories { get; set; }
+    public DbSet<Models.Passwords.Subcategory> PasswordSubcategories { get; set; }
     public DbSet<Models.WordLists.List> WordLists { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }

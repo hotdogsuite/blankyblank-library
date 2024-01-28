@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using BlankyBlankLibrary.Extensions;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace BlankyBlankLibrary.Services;
@@ -16,23 +17,62 @@ public class PasswordServices {
 
         ViewModels.PasswordsContainer passwordsContainer = JsonConvert.DeserializeObject<ViewModels.PasswordsContainer>(await passwordsFile.ReadFileContents()) ?? throw new Exception("What're you feeding me?");
 
-        var trackedDbPasswords = new Dictionary<string, Data.Models.Passwords.Password>();
+        var trackedPasswords = new Dictionary<string, Data.Models.Passwords.Password>();
+        var trackedCategories = new Dictionary<string, Data.Models.Passwords.Category>();
+        var trackedSubcategories = new Dictionary<string, Data.Models.Passwords.Subcategory>();
         
         foreach (var password in passwordsContainer.Passwords.Where(pw => !string.IsNullOrEmpty(pw.Name))) {
 
             try {
+                
+                // Get category from incoming file
+                Data.Models.Passwords.Category? dbCategory;
 
+                if (!trackedCategories.TryGetValue(password.Category, out dbCategory)) {
+                    dbCategory = _db.PasswordCategories.SingleOrDefault(cat => cat.CategoryName == password.Category);
+                    if (dbCategory == null) dbCategory = new Data.Models.Passwords.Category() { CategoryName = password.Category };
+                    trackedCategories.Add(password.Category, dbCategory);
+                }
+
+                // Get sub-category from incoming file
+                Data.Models.Passwords.Subcategory? dbSubcategory;
+
+                string? subcategoryName = string.IsNullOrEmpty(password.Subcategory) ? null : password.Subcategory;
+
+                // Some adjustments from the incoming stock file, correcting typos and errant categories
+                if (dbCategory.CategoryName == "person") {
+                    if (subcategoryName == "celebrities") subcategoryName = "celebrity";
+                    else if (subcategoryName == "game") subcategoryName = "fictional";
+                    else if (subcategoryName == "leader") subcategoryName = "famous";
+                    else if (subcategoryName == "musican") subcategoryName = "musician";
+                    else if (subcategoryName == "watery") subcategoryName = "water";
+                }
+                else if (dbCategory.CategoryName == "story") {
+                    if (subcategoryName == "boove") subcategoryName = "boovie";
+                }
+
+                string subcategoryKey = password.Category + ":" + (string.IsNullOrEmpty(subcategoryName) ? "" : subcategoryName);
+
+                if (!trackedSubcategories.TryGetValue(subcategoryKey, out dbSubcategory)) {
+                    dbSubcategory = _db.PasswordSubcategories.SingleOrDefault(cat => cat.SubcategoryName == subcategoryName && cat.Category.CategoryName == password.Category);
+                    if (dbSubcategory == null) dbSubcategory = new Data.Models.Passwords.Subcategory() {
+                        Category = dbCategory,
+                        SubcategoryName = subcategoryName
+                    };
+                    trackedSubcategories.Add(subcategoryKey, dbSubcategory);
+                }
+                
+                // Get password from incoming file
                 Data.Models.Passwords.Password? dbPassword;
                 
-                if (!trackedDbPasswords.TryGetValue(password.Name, out dbPassword)) {
+                if (!trackedPasswords.TryGetValue(password.Name, out dbPassword)) {
                     dbPassword = _db.Passwords.SingleOrDefault(pw => pw.Name == password.Name);
                     if (dbPassword == null) {
                         dbPassword = new Data.Models.Passwords.Password() {
                             LegacyId = Convert.ToInt32(password.Id),
                             Name = password.Name.Trim(),
                             Difficulty = password.Difficulty,
-                            Category = password.Category.Trim(),
-                            Subcategory = string.IsNullOrEmpty(password.Subcategory.Trim()) ? null : password.Subcategory.Trim(),
+                            Subcategory = dbSubcategory,
                             AlternateSpellings = password.AlternateSpellings
                                                 .Select(alternate_spelling => new Data.Models.Passwords.AlternateSpelling() {
                                                     Spelling = alternate_spelling
@@ -53,7 +93,7 @@ public class PasswordServices {
                         };
                         _db.Passwords.Add(dbPassword);
                     }
-                    trackedDbPasswords.Add(password.Name, dbPassword);
+                    trackedPasswords.Add(password.Name, dbPassword);
                 }
 
             } catch (Exception ex) {
@@ -80,8 +120,8 @@ public class PasswordServices {
                     Id = password.Id.ToString(),
                     Name = password.Name,
                     Difficulty = password.Difficulty,
-                    Category = password.Category,
-                    Subcategory = password.Subcategory == null ? "" : password.Subcategory,
+                    Category = password.Subcategory.Category.CategoryName,
+                    Subcategory = password.Subcategory.SubcategoryName == null ? "" : password.Subcategory.SubcategoryName,
                     AlternateSpellings = password.AlternateSpellings.Select(alternate_spelling => alternate_spelling.Spelling),
                     ForbiddenWords = password.ForbiddenWords.Select(forbidden_word => forbidden_word.Word),
                     TailoredWords = password.TailoredWords.Select(tailored_word => new ViewModels.PasswordsContainer.Password.TailoredWord() {
@@ -108,8 +148,8 @@ public class PasswordServices {
                 Id = password.Id,
                 Name = password.Name,
                 Difficulty = password.Difficulty,
-                Category = password.Category,
-                Subcategory = password.Subcategory,
+                Category = password.Subcategory.Category.CategoryName,
+                Subcategory = password.Subcategory.SubcategoryName,
                 UsCentric = password.UsCentric,
                 AlternateSpellings = password.AlternateSpellings.Select(alternate_spelling => alternate_spelling.Spelling),
                 ForbiddenWords = password.ForbiddenWords.Select(forbidden_word => forbidden_word.Word),
@@ -128,7 +168,7 @@ public class PasswordServices {
                 Id = password.Id,
                 Name = password.Name,
                 Difficulty = password.Difficulty,
-                CombinedCategoryIdentifier = $"{password.Category}:{password.Subcategory}",
+                SubcategoryId = password.Subcategory.Id,
                 UsCentric = password.UsCentric,
                 AlternateSpellings = password.AlternateSpellings.Select(alt_sp => new ViewModels.PasswordEdit.AlternateSpelling() {
                     Id = alt_sp.Id,
@@ -153,16 +193,11 @@ public class PasswordServices {
             .Single();
     }
 
-    private static string CombineCategoryIdentifiers(string category, string? subcategory) {
-        return category + ":" + (subcategory ?? "0");
-    }
-
     public IEnumerable<SelectListItem> GetCategories () {
-        return _db.Passwords
-            .Select(password => new SelectListItem($"{password.Category} > {password.Subcategory}", CombineCategoryIdentifiers(password.Category, password.Subcategory)))
-            .ToList()
-            .OrderBy(item => item.Value)
-            .DistinctBy(item => item.Value);
+        return _db.PasswordSubcategories
+            .OrderBy(cat => cat.Category.CategoryName)
+            .ThenBy(cat => cat.SubcategoryName)
+            .Select(cat => new SelectListItem(cat.Category.CategoryName + " > " + (cat.SubcategoryName ?? "just " + cat.Category.CategoryName), cat.Id.ToString()));
     }
 
     public IEnumerable<SelectListItem> GetWordLists () {
@@ -173,19 +208,88 @@ public class PasswordServices {
     }
 
     public async Task<int> UpdatePassword (ViewModels.PasswordEdit passwordEdit) {
-        var dbPassword = passwordEdit.Id == 0 ? new Data.Models.Passwords.Password() : _db.Passwords.Single(password => password.Id == passwordEdit.Id);
-        if (dbPassword.Id == 0) _db.Passwords.Add(dbPassword);
+
+        Data.Models.Passwords.Password dbPassword;
+
+        if (passwordEdit.Id == 0) {
+            dbPassword = new Data.Models.Passwords.Password() {
+                AlternateSpellings = new List<Data.Models.Passwords.AlternateSpelling>(),
+                ForbiddenWords = new List<Data.Models.Passwords.ForbiddenWord>(),
+                TailoredWords = new List<Data.Models.Passwords.TailoredWord>()
+            };
+            _db.Passwords.Add(dbPassword);
+        } else {
+            dbPassword = _db.Passwords
+                .Include(pw => pw.AlternateSpellings)
+                .Include(pw => pw.ForbiddenWords)
+                .Include(pw => pw.TailoredWords)
+                    .ThenInclude(tw => tw.List)
+                .Single(pw => pw.Id == passwordEdit.Id);
+        }
 
         // Basic Information
         dbPassword.Name = passwordEdit.Name;
         dbPassword.Difficulty = passwordEdit.Difficulty;
-        dbPassword.Category = passwordEdit.CombinedCategoryIdentifier.Split(':')[0];
-        dbPassword.Subcategory = passwordEdit.CombinedCategoryIdentifier.Split(':')[1] == "0" ? null : passwordEdit.CombinedCategoryIdentifier.Split(':')[1];
+        dbPassword.Subcategory = _db.PasswordSubcategories.Single(sub => sub.Id == passwordEdit.SubcategoryId);
         dbPassword.UsCentric = passwordEdit.UsCentric;
         
         // Alternate Spellings
         foreach (var altSpelling in passwordEdit.AlternateSpellings) {
 
+            // Add new if id = 0 and not flagged for deletion
+            if (altSpelling.Id == 0) {
+                if (altSpelling.DeleteOnSave || string.IsNullOrWhiteSpace(altSpelling.Spelling)) { continue; }
+                dbPassword.AlternateSpellings.Add(new Data.Models.Passwords.AlternateSpelling() { Spelling = altSpelling.Spelling });
+            }
+            else {
+                if (altSpelling.DeleteOnSave) {
+                    dbPassword.AlternateSpellings.Remove(dbPassword.AlternateSpellings.Single(alt => alt.Id == altSpelling.Id));
+                }
+                else {
+                    dbPassword.AlternateSpellings.Single(alt => alt.Id == altSpelling.Id).Spelling = altSpelling.Spelling;
+                }
+            }
+        }
+
+        // Forbidden Words
+        foreach (var forbiddenWord in passwordEdit.ForbiddenWords) {
+
+            // Add new if id = 0 and not flagged for deletion
+            if (forbiddenWord.Id == 0) {
+                if (forbiddenWord.DeleteOnSave || string.IsNullOrWhiteSpace(forbiddenWord.Word)) { continue; }
+                dbPassword.ForbiddenWords.Add(new Data.Models.Passwords.ForbiddenWord() { Word = forbiddenWord.Word });
+            }
+            else {
+                if (forbiddenWord.DeleteOnSave) {
+                    dbPassword.ForbiddenWords.Remove(dbPassword.ForbiddenWords.Single(alt => alt.Id == forbiddenWord.Id));
+                }
+                else {
+                    dbPassword.ForbiddenWords.Single(alt => alt.Id == forbiddenWord.Id).Word = forbiddenWord.Word;
+                }
+            }
+        }
+
+        // Tailored Words
+        foreach (var tailoredWord in passwordEdit.TailoredWords) {
+
+            // Add new if id = 0 and not flagged for deletion
+            if (tailoredWord.Id == 0) {
+                if (tailoredWord.DeleteOnSave || string.IsNullOrWhiteSpace(tailoredWord.Word)) { continue; }
+                dbPassword.TailoredWords.Add(new Data.Models.Passwords.TailoredWord() {
+                    Word = tailoredWord.Word,
+                    List = _db.WordLists.Single(wl => wl.Id == tailoredWord.ListId)
+                });
+            }
+            else {
+                if (tailoredWord.DeleteOnSave) {
+                    dbPassword.TailoredWords.Remove(dbPassword.TailoredWords.Single(alt => alt.Id == tailoredWord.Id));
+                }
+                else {
+                    var dbTailoredWord = dbPassword.TailoredWords.Single(alt => alt.Id == tailoredWord.Id);
+                    dbTailoredWord.Word = tailoredWord.Word;
+                    dbTailoredWord.List = _db.WordLists.Single(wl => wl.Id == tailoredWord.ListId);
+                }
+            }
         }
 
         await _db.SaveChangesAsync();

@@ -13,11 +13,8 @@ public class PasswordEditModel : PageModel {
     [BindProperty]
     public ViewModels.PasswordEdit Password { get; set; } = null!;
 
-    public IEnumerable<SelectListItem> AvailableCategories { get; set; } = null!;
-
     public void OnGet (int id) {
         Password = _passwordServices.GetPasswordEdit(id);
-        AvailableCategories = _passwordServices.GetCategories();
     }
 
     public async Task<IActionResult> OnPostSave () {
