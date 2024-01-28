@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using BlankyBlankLibrary.Extensions;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
 
 namespace BlankyBlankLibrary.Services;
@@ -117,6 +118,78 @@ public class PasswordServices {
                     ListName = tailored_word.List.Name
                 })
             });
+    }
+
+    public ViewModels.PasswordEdit GetPasswordEdit (int id = 0) {
+        if (id == 0) return new ViewModels.PasswordEdit();
+        return _db.Passwords
+            .Where(password => password.Id == id)
+            .Select(password => new ViewModels.PasswordEdit() {
+                Id = password.Id,
+                Name = password.Name,
+                Difficulty = password.Difficulty,
+                CombinedCategoryIdentifier = $"{password.Category}:{password.Subcategory}",
+                UsCentric = password.UsCentric,
+                AlternateSpellings = password.AlternateSpellings.Select(alt_sp => new ViewModels.PasswordEdit.AlternateSpelling() {
+                    Id = alt_sp.Id,
+                    DeleteOnSave = false,
+                    Spelling = alt_sp.Spelling
+                })
+                .ToList(),
+                ForbiddenWords = password.ForbiddenWords.Select(for_wd => new ViewModels.PasswordEdit.ForbiddenWord() {
+                    Id = for_wd.Id,
+                    DeleteOnSave = false,
+                    Word = for_wd.Word
+                })
+                .ToList(),
+                TailoredWords = password.TailoredWords.Select(tlr_wd => new ViewModels.PasswordEdit.TailoredWord() {
+                    Id = tlr_wd.Id,
+                    DeleteOnSave = false,
+                    Word = tlr_wd.Word,
+                    ListId = tlr_wd.List.Id
+                })
+                .ToList()
+            })
+            .Single();
+    }
+
+    private static string CombineCategoryIdentifiers(string category, string? subcategory) {
+        return category + ":" + (subcategory ?? "0");
+    }
+
+    public IEnumerable<SelectListItem> GetCategories () {
+        return _db.Passwords
+            .Select(password => new SelectListItem($"{password.Category} > {password.Subcategory}", CombineCategoryIdentifiers(password.Category, password.Subcategory)))
+            .ToList()
+            .OrderBy(item => item.Value)
+            .DistinctBy(item => item.Value);
+    }
+
+    public IEnumerable<SelectListItem> GetWordLists () {
+        return _db.WordLists
+            .Select(word_list => new SelectListItem(word_list.Name, word_list.Id.ToString()))
+            .ToList()
+            .OrderBy(item => item.Text);
+    }
+
+    public async Task<int> UpdatePassword (ViewModels.PasswordEdit passwordEdit) {
+        var dbPassword = passwordEdit.Id == 0 ? new Data.Models.Passwords.Password() : _db.Passwords.Single(password => password.Id == passwordEdit.Id);
+        if (dbPassword.Id == 0) _db.Passwords.Add(dbPassword);
+
+        // Basic Information
+        dbPassword.Name = passwordEdit.Name;
+        dbPassword.Difficulty = passwordEdit.Difficulty;
+        dbPassword.Category = passwordEdit.CombinedCategoryIdentifier.Split(':')[0];
+        dbPassword.Subcategory = passwordEdit.CombinedCategoryIdentifier.Split(':')[1] == "0" ? null : passwordEdit.CombinedCategoryIdentifier.Split(':')[1];
+        dbPassword.UsCentric = passwordEdit.UsCentric;
+        
+        // Alternate Spellings
+        foreach (var altSpelling in passwordEdit.AlternateSpellings) {
+
+        }
+
+        await _db.SaveChangesAsync();
+        return dbPassword.Id;
     }
 
 }
